@@ -1,0 +1,57 @@
+#Question 3
+#Aryan Vashistha
+import pandas as pd 
+import matplotlib.pyplot as plt 
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_percentage_error
+from statsmodels.tsa.ar_model import AutoReg as AR
+data = pd.read_csv("C:\\Users\\ASUS\\Desktop\\daily_covid_cases.csv",parse_dates=['Date'],index_col=['Date'],sep=',')
+train_size = 0.65 
+X = data.values
+train, test = X[:int(len(X)*train_size)], X[int(len(X)*train_size):]
+
+def function(train_data, test_data, lag):
+    wind=lag
+    Model = AR(train_data, lags=wind)
+    Model_fit = Model.fit() 
+    coef = Model_fit.params 
+
+    hist = train_data[len(train_data)-wind:]
+    hist = [hist[i] for i in range(len(hist))]
+    pred = list() 
+    for t in range(len(test_data)):
+        Len = len(hist)
+        lag = [hist[i] for i in range(Len-wind,Len)]
+        yhat = coef[0] 
+        for d in range(wind):
+            yhat += coef[d+1] * lag[wind-d-1] 
+        obs = test_data[t]
+        pred.append(yhat) 
+        hist.append(obs) 
+    RMSE_=mean_squared_error(test_data, pred,squared=False)*100/(sum(test_data)/len(test_data))
+    mape_=mean_absolute_percentage_error(test_data, pred)
+    return RMSE_, mape_
+
+lag=[1,5,10,15,25]
+RMSE_lst=[]
+Mape_lst=[]
+for i in lag:
+    rmse, mape=function(train, test,i)
+    RMSE_lst.append(rmse[0])
+    Mape_lst.append(mape)
+
+plt.bar(lag,RMSE_lst)
+plt.ylabel('RMSE error')
+plt.xlabel('Lag values')
+plt.title("Q3\n Bar chart b/w RMSE & Lag value")
+plt.xticks(lag)
+plt.show()
+
+plt.bar(lag, Mape_lst)
+plt.ylabel('MAPE error')
+plt.xlabel('Lag values')
+plt.title("Q3\n Bar chart b/w MAPE & Lag value")
+plt.xticks(lag)
+plt.show()
+
+
