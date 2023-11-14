@@ -1,5 +1,4 @@
-#Question 3
-#Aryan Vashistha
+
 import pandas as pd 
 import matplotlib.pyplot as plt 
 from sklearn.metrics import mean_squared_error
